@@ -1,0 +1,352 @@
+/**
+ * FINAL PROJECT
+ * 
+ * An improvement on my Connect 4 program from AP Java in high school
+ * It's Connect 4 with a radical user interface
+ * 
+ * This version:
+ * - converted my text-based Connect 4 into a GUI
+ * - is (hopefully) more elegant than my original
+ * 
+ * Utilizes some parts/ideas from TicTacToe and my original Connect 4 (linked below)
+ * https://repl.it/@garridoa/ConnectFour
+ * ^^ this was decent at the time, but now I kinda cringe looking at it
+ * 
+ * @author ag1454
+ */
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+@SuppressWarnings("serial")
+public class ConnectFour extends JFrame
+{
+	private JButton[] columns; // buttons for user to choose where to place "piece"
+	private JButton[][] board; // actual board
+	private JLabel statsLabel;
+	private String turn;
+	private boolean gameOver;
+	
+	/**
+	 * Constructor
+	 * 
+	 * Setup derived from TicTacToe
+	 */
+	public ConnectFour()
+	{
+		super("Connect 4");
+		
+		turn = "X";
+		gameOver = false;
+		
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
+		add(mainPanel());
+		pack();
+		setVisible(true);
+		
+		updateStats();
+	}
+	
+	/**
+	 * Makes the window where all the radicalness happens
+	 * 
+	 * @return the thingy where GUI happens...the window thing
+	 * 
+	 * Setup derived from TicTacToe with changes appropriate for Connect 4
+	 */
+	private JPanel mainPanel()
+	{
+		columns = new JButton[7];
+		board = new JButton[6][7];
+		
+		Listener listen = new Listener();
+		
+		JPanel colPanel = new JPanel();
+		JPanel boardPanel = new JPanel(new GridLayout(6, 7));
+		JPanel statsPanel = new JPanel();
+		
+		for (int i = 0; i < 7; i++)
+		{
+			columns[i] = new JButton(Integer.toString(i + 1));
+			columns[i].setPreferredSize(new Dimension(50, 50));
+			columns[i].setBackground(Color.BLUE);
+			columns[i].setForeground(Color.WHITE);
+			columns[i].addActionListener(listen);
+			colPanel.add(columns[i]);
+		}
+		
+		for (int i = 0; i < 6; i++)
+		{
+			for (int j = 0; j < 7; j++)
+			{
+				board[i][j] = new JButton("");
+				board[i][j].setPreferredSize(new Dimension(50, 50));
+				board[i][j].setBackground(Color.YELLOW);
+				boardPanel.add(board[i][j]);
+			}
+		}
+		
+		statsLabel = new JLabel(" ");
+		statsPanel.add(statsLabel);
+		statsPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+		
+		JPanel mainPanel = new JPanel(new BorderLayout());
+		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		
+		mainPanel.add(colPanel, BorderLayout.NORTH);
+		mainPanel.add(boardPanel, BorderLayout.CENTER);
+		mainPanel.add(statsPanel, BorderLayout.SOUTH);
+		
+		return mainPanel;
+	}
+	
+	/**
+	 * When the numbered buttons are pressed, an X or O "drops"
+	 * 
+	 * Referenced TicTacToe...getting the X/O to "drop" from code I thought
+	 * of in the shower and loosely derived from my original code.
+	 */
+	private class Listener implements ActionListener
+	{
+		public void actionPerformed(ActionEvent event)
+		{
+			JButton source = (JButton) event.getSource();
+			int i = 5;
+			
+			if (!gameOver)
+			{
+				while (i >= 0)
+				{
+					if (board[i][Integer.parseInt(source.getText())
+					    - 1].getText().equals(""))
+					{
+						board[i][Integer.parseInt(source.getText())
+					    - 1].setText(turn);
+						
+						if (turn.equals("X"))
+						{
+							turn = "O";
+							board[i][Integer.parseInt(source.getText())
+							- 1].setForeground(Color.RED);
+						}
+						else
+						{
+							turn = "X";
+						}
+					
+						updateStats();
+						break;
+					}
+					else
+					{
+						i--;
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Checks for who connected four
+	 * 
+	 * @return String that displays who won (if they connected four)
+	 * 
+	 * Setup derived from TicTacToe
+	 * 
+	 * Checking for connect four loosely derived from my original game with the
+	 * addition of more code I thought of in the shower that's (hopefully) more
+	 * "elegant" than my original cause that was a mess.
+	 */
+	private String connectedFour()
+	{
+		// horizontal win
+		for (int i = 5; i >= 0; i--)
+		{
+			int xCount = 0;
+			int oCount = 0;
+			
+			for (int j = 0; j < 7; j++)
+			{
+				if (board[i][j].getText().equals("X"))
+				{
+					xCount++;
+					
+					if (xCount == 4)
+					{
+						return "X has emerged victorious.";
+					}
+				}
+				else
+				{
+					xCount = 0;
+				}
+					
+				if (board[i][j].getText().equals("O"))
+				{
+					oCount++;
+						
+					if (oCount == 4)
+					{
+						return "O has emerged victorious.";
+					}
+				}
+				else
+				{
+					oCount = 0;
+				}
+			}
+		}
+		
+		// vertical win
+		for (int i = 0; i < 7; i++)
+		{
+			int xCount = 0;
+			int oCount = 0;
+			
+			for (int j = 5; j >= 0; j--)
+			{
+				if (board[j][i].getText().equals("X"))
+				{
+					xCount++;
+					
+					if (xCount == 4)
+					{
+						return "X has emerged victorious.";
+					}
+				}
+				else
+				{
+					xCount = 0;
+				}
+					
+				if (board[j][i].getText().equals("O"))
+				{
+					oCount++;
+						
+					if (oCount == 4)
+					{
+						return "O has emerged victorious.";
+					}
+				}
+				else
+				{
+					oCount = 0;
+				}
+			}
+		}
+	
+		// diagonal win (left to right)
+		// based on of my original code
+		// I combined all those if statements here
+		for (int i = 5; i >= 3; i--)
+		{
+			for (int j = 0; j <= 3; j++)
+			{
+				if (board[i][j].getText().equals("X") &&
+					board[i - 1][j + 1].getText().equals("X") &&
+					board[i - 2][j + 2].getText().equals("X") &&
+					board[i - 3][j + 3].getText().equals("X"))
+		        {
+					return "X has emerged victorious.";
+		        }
+				
+				if (board[i][j].getText().equals("O") &&
+					board[i - 1][j + 1].getText().equals("O") &&
+					board[i - 2][j + 2].getText().equals("O") &&
+					board[i - 3][j + 3].getText().equals("O"))
+			    {
+					return "O has emerged victorious.";
+			    }
+			}
+		}
+		
+		// diagonal win (right to left)
+		// based on of my original code
+		// I combined all those if statements here
+		for (int i = 5; i >= 3; i--)
+		{
+			for (int j = 6; j >= 3; j--)
+			{
+				if (board[i][j].getText().equals("X") &&
+					board[i - 1][j - 1].getText().equals("X") &&
+					board[i - 2][j - 2].getText().equals("X") &&
+					board[i - 3][j - 3].getText().equals("X"))
+			    {
+					return "X has emerged victorious.";
+			    }
+					
+				if (board[i][j].getText().equals("O") &&
+					board[i - 1][j - 1].getText().equals("O") &&
+					board[i - 2][j - 2].getText().equals("O") &&
+					board[i - 3][j - 3].getText().equals("O"))
+				{
+					return "O has emerged victorious.";
+				}
+			}
+		}
+		
+		// check for stalemate
+		// modified from TicTacToe
+		// I almost forgot this, whoops...
+		int total = 0;
+		
+		for (int i = board.length - 1; i >= 0; i--)
+		{
+			for (int j = board[0].length - 1; j >= 0; j--)
+			{
+				if (board[i][j].getText().equals("X") ||
+					board[i][j].getText().equals("O"))
+				{
+					total++;
+					
+					if (total == 42)
+					{
+						return "Ya'll failed to connect four.";
+					}
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Updates whose turn it is, who won, and if there's a stalemate
+	 * 
+	 * From TicTacToe
+	 */
+	private void updateStats()
+	{
+		String stat = connectedFour();
+		
+		if (stat == null)
+		{
+			statsLabel.setText(turn + ", make your move.");
+		}
+		else
+		{
+			statsLabel.setText(stat);
+			gameOver = true;
+		}
+	}
+	
+	/**
+	 * Just here so the board shows up
+	 * 
+	 * @param args no args are needed/taken
+	 */
+	public static void main(String[] args)
+	{
+		new ConnectFour();
+	}
+}
